@@ -3,7 +3,8 @@ import mongoose from 'mongoose'
 
 const hackathonSchema = new mongoose.Schema({
     image : {
-        type : String
+        type : String,
+        default : "hackathon_image.jpeg"
     },
     title: {
         type: String,

@@ -78,13 +78,56 @@ cron.schedule("0 0 * * *", async () => {
   }
 });
 // // controllers/dailyQuiz.controller.js
+// export const getDailyQuiz = async (req, res) => {
+//   try {
+//     const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // +05:30 offset
+
+//     // Get current time
+//     const now = new Date();
+
+//     // Shift "now" into IST
+//     const nowIst = new Date(now.getTime() + IST_OFFSET_MS);
+
+//     // Extract IST date parts
+//     const year = nowIst.getUTCFullYear();
+//     const month = nowIst.getUTCMonth();
+//     const day = nowIst.getUTCDate();
+
+//     // Start of IST day → shift back to UTC
+//     const startUtc = new Date(Date.UTC(year, month, day) - IST_OFFSET_MS);
+//     // End of IST day
+//     const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000);
+
+//     console.log("IST Day window (UTC):", startUtc.toISOString(), "→", endUtc.toISOString());
+
+//     const dailyQuiz = await dailyQuizModel
+//       .findOne({ date: { $gte: startUtc, $lt: endUtc } })
+//       .populate("questions")
+//       .sort({ createdAt: -1 });
+
+//     if (!dailyQuiz) {
+//       return res.status(404).json({ message: "No quiz set for today yet" });
+//     }
+
+//     res.status(200).json({
+//       message: "Today's latest quiz",
+//       dailyQuiz
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 export const getDailyQuiz = async (req, res) => {
   try {
     const today = new Date();
 
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-
+    // console.log(new Date(Date.now()));
+    const startOfDay = new Date(Date.now());
+    console.log(startOfDay);
+    const endOfDay = new Date(Date.now() + 1);
+    console.log(endOfDay);
+    console.log("------------");
     const dailyQuiz = await dailyQuizModel
       .findOne({
         date: { $gte: startOfDay, $lt: endOfDay }
@@ -104,6 +147,7 @@ export const getDailyQuiz = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const sendAllQuizData = async(req , res)=>{
   try{

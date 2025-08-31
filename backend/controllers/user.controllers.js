@@ -484,7 +484,7 @@ export const updatingEducation = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
+    
     res.status(200).json({
       message: "Education details updated successfully",
       user: updatedUser,
@@ -563,3 +563,31 @@ export const displayLeaderBoard = async (req, res) => {
   }
 };
 
+export const deleteConnectedApp = async (req, res) => {
+  try {
+    const { userId, appName } = req.body;
+
+    if (!userId || !appName) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { connectedApps: { appName: appName } } // removes by appName
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Connected app deleted successfully",
+      connectedApps: updatedUser.connectedApps
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
