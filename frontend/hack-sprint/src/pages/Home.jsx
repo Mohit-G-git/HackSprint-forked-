@@ -108,6 +108,8 @@ const GridBackground = () => (
 const TypingText = ({ text, className = "" }) => {
   const [displayText, setDisplayText] = useState("")
   const [isTyping, setIsTyping] = useState(true)
+  const [isStudent, setIsStudent] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let i = 0
@@ -271,7 +273,7 @@ const DeveloperJourneySection = () => {
             Your Path to Excellence
           </h2>
           <p className="text-gray-400 text-base sm:text-lg max-w-4xl mx-auto leading-relaxed opacity-0 animate-[fadeInUp_0.8s_ease-out_0.6s_forwards] mt-4 sm:mt-6">
-            Follow a structured learning path designed by industry experts. From beginner to advanced, each step is
+            Follow a structured learning path designed by expert developers. From beginner to advanced, each step is
             crafted to accelerate your growth and maximize your potential.
           </p>
         </div>
@@ -315,7 +317,7 @@ const DeveloperJourneySection = () => {
                         </div>
                         <div>
                           <p className="text-green-400 text-sm font-semibold">{journey.phase}</p>
-                          <p className="text-gray-400 text-sm">{journey.duration}</p>
+                          {/* <p className="text-gray-400 text-sm">{journey.duration}</p> */}
                         </div>
                       </div>
                     </div>
@@ -343,7 +345,7 @@ const DeveloperJourneySection = () => {
                       ))}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-800/50 gap-4">
+                    {/* <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-800/50 gap-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-sm text-gray-400">
                         <span className="flex items-center gap-2 hover:text-green-400 transition-colors duration-300">
                           <Briefcase className="w-4 h-4" />
@@ -354,11 +356,11 @@ const DeveloperJourneySection = () => {
                           {journey.duration}
                         </span>
                       </div>
-                      {/* <button className="bg-green-400/10 hover:bg-green-400/20 border border-green-400/20 text-green-400 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-1 hover:scale-105 hover:shadow-lg hover:shadow-green-400/20 group w-full sm:w-auto justify-center">
+                      <button className="bg-green-400/10 hover:bg-green-400/20 border border-green-400/20 text-green-400 px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-1 hover:scale-105 hover:shadow-lg hover:shadow-green-400/20 group w-full sm:w-auto justify-center">
                         View Details
                         <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-1" />
-                      </button> */}
-                    </div>
+                      </button>
+                    </div> */}
                   </div>
                 </div>
 
@@ -394,11 +396,23 @@ const DeveloperJourneySection = () => {
 const Home = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true)
+  const [userType, setUserType] = useState("none");
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000)
-    return () => clearTimeout(timer)
-  }, [])
+    const studentToken = localStorage.getItem("token");
+    const adminToken = localStorage.getItem("adminToken");
+
+    if (studentToken) {
+      setUserType("student");
+    } else if (adminToken) {
+      setUserType("admin");
+    } else {
+      setUserType("none");
+    }
+
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -422,6 +436,64 @@ const Home = () => {
 
   return (
     <div className="bg-gray-900 relative overflow-hidden min-h-screen -mt-16">
+
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 backdrop-blur-sm border-b border-gray-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => handleNavigate('/')}
+              className="flex items-center space-x-2 sm:space-x-3 cursor-pointer"
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10">
+                <img src='hackSprint.webp' className="w-full h-full object-contain" alt="HackSprint Logo" />
+              </div>
+              <span className="text-lg sm:text-xl lg:text-2xl font-bold text-white font-mono tracking-wide">
+                HackSprint
+              </span>
+            </button>
+
+          </div>
+          <div className="flex items-center gap-4">
+            {userType === "none" && (
+              <>
+                <button
+                  onClick={() => navigate("/studenthome")}
+                  className="bg-green-400/10 cursor-pointer hover:bg-green-400/20 border border-green-400/20 text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105"
+                >
+                  Student
+                </button>
+                <button
+                  onClick={() => navigate("/adminhome")}
+                  className="bg-green-400/10 cursor-pointer hover:bg-green-400/20 border border-green-400/20 text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105"
+                >
+                  Admin
+                </button>
+              </>
+            )}
+
+            {userType === "student" && (
+              <button
+                onClick={() => navigate("/studenthome")}
+                className="bg-green-400/10 cursor-pointer hover:bg-green-400/20 border border-green-400/20 text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105"
+              >
+                Student
+              </button>
+            )}
+
+            {userType === "admin" && (
+              <button
+                onClick={() => navigate("/adminhome")}
+                className="bg-green-400/10 cursor-pointer hover:bg-green-400/20 border border-green-400/20 text-green-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105"
+              >
+                Admin
+              </button>
+            )}
+          </div>
+
+        </div>
+      </nav>
+
       <GridBackground />
       <FloatingParticles />
 
@@ -480,7 +552,7 @@ const Home = () => {
         </div>
 
         {/* Floating Quote Boxes - Enhanced and responsive */}
-        <div className="hidden 2xl:block absolute inset-0 z-10">
+        <div className="hidden mt-10 2xl:block absolute inset-0 z-10">
           <div
             className="absolute border border-gray-800/50 bg-gray-900/80 backdrop-blur-lg rounded-xl text-white text-center px-6 py-4 max-w-xs opacity-80 hover:opacity-100 hover:border-green-400/30 transition-all duration-300 cursor-default shadow-2xl"
             style={{
@@ -607,13 +679,19 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16 sm:mb-20">
             {[
               {
-                icon: Terminal,
-                title: "Cloud Development Environment",
-                desc: "Code anywhere with our browser-based IDE featuring real-time collaboration, version control, and instant deployment.",
-                features: ["VS Code Integration", "Live Collaboration", "Auto-Save & Sync", "Multi-Language Support"],
+                icon: Calendar,
+                title: "Event Schedule",
+                desc: "Stay updated with workshops, sessions, and deadlines through a centralized timeline.",
+                features: [
+                  "Interactive Timeline",
+                  "Session Reminders",
+                  "Workshop Links",
+                  "Real-Time Updates"
+                ],
                 gradient: "from-gray-900/80 to-gray-800/80",
-                accent: "blue",
+                accent: "purple",
               },
+
               {
                 icon: Users,
                 title: "Team Formation & Matching",
@@ -700,7 +778,7 @@ const Home = () => {
               From Hackathon to Unicorn
             </h2>
             <p className="text-gray-400 text-sm sm:text-base lg:text-lg max-w-4xl mx-auto leading-relaxed mt-4 sm:mt-6">
-              Discover how our community members transformed weekend projects into billion-dollar companies, landed
+              Discover how our community members transformed weekend projects into big ideas, landed
               dream jobs at top tech firms, and revolutionized entire industries through innovation and determination.
             </p>
           </div>
@@ -709,37 +787,28 @@ const Home = () => {
             {[
               {
                 name: "Kavya Bhanvadia",
-                // role: "Founder & CEO",
-                // company: "TechFlow AI",
-                // achievement: "$50M Series A",
                 quote:
-                  "What started as a 48-hour hackathon project became a company that's revolutionizing workflow automation for Fortune 500 companies.",
+                  "Before this hackathon, I only knew the basics of web dev. Working with my team pushed me to learn fast, and I actually built my first full-stack project here.",
                 gradient: "from-gray-900/80 to-gray-800/80",
                 verified: true,
                 social: { linkedin: "#", twitter: "#" },
               },
               {
-                name: "Nayan Patidar",
-                // role: "Senior Engineer",
-                // company: "Meta",
-                // achievement: "6-Figure Salary",
+                name: "Mohit Gupta",
                 quote:
-                  "HackSprint didn't just teach me to code—it taught me to think like an innovator. The collaborative projects here prepared me for big tech.",
+                  "HackSprint gave me more than coding practice—it gave me confidence. Presenting to judges and collaborating under pressure was a whole new experience.",
                 gradient: "from-gray-900/80 to-gray-800/80",
                 verified: true,
                 social: { linkedin: "#", github: "#" },
               },
               {
                 name: "Ridham Shah",
-                // role: "CTO",
-                // company: "HealthTech Solutions",
-                // achievement: "IPO Success",
                 quote:
-                  "The collaborative spirit and technical excellence I learned here shaped how I build and lead engineering teams at scale.",
+                  "I met some of the best peers here. The mentors clarified concepts I struggled with for months, and that learning still helps me in my projects today.",
                 gradient: "from-gray-900/80 to-gray-800/80",
                 verified: true,
                 social: { linkedin: "#", twitter: "#" },
-              },
+              }
             ].map((story, index) => (
               <div
                 key={index}
@@ -784,16 +853,16 @@ const Home = () => {
                 </div>
 
                 <div className="mb-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 mb-3">
+                  {/* <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 mb-3">
                     <span className="bg-green-400/10 text-green-400 px-3 py-1 rounded-full text-sm font-medium border border-green-400/20">
                       {story.achievement}
                     </span>
-                    {/* <div className="flex">
+                    <div className="flex">
                       {[...Array(5)].map((_, i) => (
                         <Star key={i} className="w-3 h-3 text-green-400 fill-current" />
                       ))}
-                    </div> */}
-                  </div>
+                    </div>
+                  </div> */}
                   <blockquote className="text-gray-300 italic leading-relaxed text-sm sm:text-base">
                     "{story.quote}"
                   </blockquote>
@@ -845,8 +914,8 @@ const Home = () => {
 
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6">
                   <div className="text-center bg-gray-800/30 rounded-lg p-3 sm:p-4">
-                    <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">6</div>
-                    <div className="text-gray-400 text-xs sm:text-sm">Hackathons Completed</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">1</div>
+                    <div className="text-gray-400 text-xs sm:text-sm">Hackathons Live</div>
                   </div>
                   <div className="text-center bg-gray-800/30 rounded-lg p-3 sm:p-4">
                     <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">24/7</div>
@@ -863,7 +932,7 @@ const Home = () => {
                       </div>
                       <span className="bg-green-400/20 text-green-400 px-2 py-1 rounded text-xs">NEW</span>
                     </div>
-                    <p className="text-gray-400 text-sm">6 developers currently collaborating on projects</p>
+                    <p className="text-gray-400 text-sm">Developers are currently collaborating on projects</p>
                   </div>
 
                   <div className="p-4 bg-green-600/5 border border-green-600/20 rounded-lg">
@@ -892,36 +961,35 @@ const Home = () => {
                 Join the Innovation Revolution
               </h2>
               <p className="text-gray-400 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed">
-                Connect with visionary developers, entrepreneurs, and industry leaders who are shaping the future of
-                technology. From mentorship to collaboration, find your tribe in our global community of innovators.
+                Meet fellow learners, seniors, and alumni who’ve turned hackathon projects into real-world skills.
               </p>
 
               <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
                 {[
                   {
                     icon: Users,
-                    title: "Expert Mentorship Program",
-                    desc: "Learn from industry veterans, successful founders, and technical leaders who've built billion-dollar companies",
-                    badge: "Premium",
+                    title: "Peer & Mentor Guidance",
+                    desc: "Get support from seniors, alumni, and mentors who’ve been through the same journey and can guide you with real advice.",
+                    badge: "Helpful",
                   },
                   {
                     icon: Target,
-                    title: "Career Acceleration Track",
-                    desc: "Fast-track your path to senior roles with personalized guidance, portfolio reviews, and interview prep",
+                    title: "Skill Growth Track",
+                    desc: "Boost your coding, problem-solving, and teamwork skills with hands-on challenges and project feedback.",
                     badge: "Popular",
                   },
                   {
                     icon: Award,
-                    title: "Recognition & Rewards",
-                    desc: "Showcase your skills, win prestigious competitions, and earn certifications recognized by top companies",
+                    title: "Prizes & Recognition",
+                    desc: "Win exciting rewards, certificates, and recognition that add real value to your resume and future opportunities.",
                     badge: "New",
                   },
                   {
                     icon: Globe,
-                    title: "Global Networking Events",
-                    desc: "Attend virtual and in-person meetups, conferences, and hackathons in major tech hubs worldwide",
+                    title: "Community & Networking",
+                    desc: "Meet like-minded students from different colleges, build lasting connections, and grow your circle of innovators.",
                     badge: "Featured",
-                  },
+                  }
                 ].map((benefit, index) => (
                   <div
                     key={index}
@@ -1012,7 +1080,7 @@ const Home = () => {
       </section> */}
 
       {/* Call to Action Section */}
-     <section className="fade-section py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 relative bg-gray-900/30 backdrop-blur-sm">
+      <section className="fade-section py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 relative bg-gray-900/30 backdrop-blur-sm">
         <div className="max-w-full mx-auto text-center">
           <div className="relative bg-gray-900/70 backdrop-blur-sm py-16 sm:py-24 px-6 text-center">
             {/* <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-green-600/10 blur-2xl"></div> */}
@@ -1027,9 +1095,9 @@ const Home = () => {
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white ZaptronFont text-center relative leading-tight mb-4 sm:mb-6">
                 Ready to Transform Your Future?
               </h2>
-              <p className="text-gray-400 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed max-w-2xl mx-auto">
-                Join thousands of developers who have already accelerated their careers, built amazing products, and
-                connected with the global tech community. Your innovation journey starts here.
+              <p className="text-gray-400 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed max-w-3xl mx-auto">
+                Join fellow developers who have already accelerated their careers, built amazing products, and
+                connected with the tech community. Your innovation journey starts here.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6 sm:mb-8">
@@ -1049,15 +1117,15 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-sm text-gray-400">
                 <span className="flex items-center gap-2 bg-gray-800/30 px-4 py-2 rounded-full">
                   <CheckCircle className="w-4 h-4 text-green-400" />
-                  Free to start
+                  Free for all students
                 </span>
                 <span className="flex items-center gap-2 bg-gray-800/30 px-4 py-2 rounded-full">
                   <CheckCircle className="w-4 h-4 text-green-400" />
-                  No credit card required
+                  No experience needed
                 </span>
                 <span className="flex items-center gap-2 bg-gray-800/30 px-4 py-2 rounded-full">
                   <CheckCircle className="w-4 h-4 text-green-400" />
-                  Join in 30 seconds
+                  Team up or go solo
                 </span>
               </div>
             </div>
@@ -1065,7 +1133,7 @@ const Home = () => {
         </div>
       </section>
 
-      <style jsx>{`
+      <style jsx="true">{`
         .fade-section {
           opacity: 0;
           transform: translateY(30px);

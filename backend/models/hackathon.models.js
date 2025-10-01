@@ -2,9 +2,8 @@
 import mongoose from 'mongoose'
 
 const hackathonSchema = new mongoose.Schema({
-    image : {
-        type : String,
-        default : "hackathon_image.jpeg"
+    image: {
+        type: String
     },
     title: {
         type: String,
@@ -26,6 +25,12 @@ const hackathonSchema = new mongoose.Schema({
     endDate: {
         type: Date
     },
+    submissionStartDate : {
+        type : Date
+    },
+    submissionEndDate : {
+        type : Date
+    },
     refMaterial: {
         type: String
     },
@@ -45,8 +50,14 @@ const hackathonSchema = new mongoose.Schema({
         //     values : ["Web Dev" , "AI/ML" , "Blockchain" , "IoT"]
         // }
     },
-    prizeMoney: {
+    prizeMoney1: {
         type: Number
+    },
+    prizeMoney2 :{
+        type : Number
+    },
+    prizeMoney3 : {
+        type : Number
     },
     techStackUsed: {
         type: Array,
@@ -86,7 +97,16 @@ const hackathonSchema = new mongoose.Schema({
     },
     registeredParticipants: [
         { type: mongoose.Schema.Types.ObjectId, ref: "registeredParticipants" }
-    ]
+    ],
+    allowedFileTypes: {
+        docs: { type: [String], default: ["pdf", "docx"] },   // default docs
+        images: { type: [String], default: ["jpg", "jpeg", "png"] }, // default images
+        videos: { type: [String], default: ["mp4"] }, // default videos
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Admin"
+    }
 })
 
 hackathonSchema.pre(/^find/, async function (next) {
@@ -96,7 +116,7 @@ hackathonSchema.pre(/^find/, async function (next) {
     await this.model.updateMany(
         {
             startDate: { $lte: currentTime },
-            endDate: { $gte: currentTime }
+            submissionEndDate: { $gte: currentTime }
         },
         {
             status: true
@@ -106,7 +126,7 @@ hackathonSchema.pre(/^find/, async function (next) {
     //mark status : false for inactive hackathons
     await this.model.updateMany(
         {
-            endDate: { $lt: currentTime }
+            submissionEndDate: { $lt: currentTime }
         },
         { status: false }
     )

@@ -1,11 +1,12 @@
 import cron from "node-cron";
 import devquestModel from "../models/devquest.model.js";
 import dailyQuizModel from "../models/dailyQuiz.model.js";
+import { getISTDayBounds } from "../utils/date.js";
 
 // Helper: get today's date without time
-  // const getDateOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+// const getDateOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-  // Auto job: runs every midnight (00:00)
+// Auto job: runs every midnight (00:00)
 //   cron.schedule("*/5 * * * *", async () => {
 //     try {
 //       // const today = getDateOnly(new Date());
@@ -54,83 +55,71 @@ import dailyQuizModel from "../models/dailyQuiz.model.js";
 //       console.error("❌ Error creating daily quiz:", err.message);
 //     }
 //   });
-const getDateOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+// const getDateOnly = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-// Auto job: runs every 5 minutes (test mode)
-cron.schedule("0 0 * * *", async () => {
+// // Auto job: runs every 5 minutes (test mode)
+// cron.schedule("0 0 * * *", async () => {
+//   try {
+//     const today = getDateOnly(new Date());
+
+//     // Fetch 5 random questions
+//     const questions = await devquestModel.aggregate([
+//       { $sample: { size: 8 } }
+//     ]);
+
+//     // Always create a NEW quiz (don’t overwrite old ones)
+//     await dailyQuizModel.create({
+//       date: today, // keep today's date so we know when it belongs
+//       questions: questions.map(q => q._id)
+//     });
+
+//     console.log("✅ New daily quiz inserted at", new Date().toLocaleTimeString());
+//   } catch (err) {
+//     console.error("❌ Error creating daily quiz:", err.message);
+//   }
+// });
+// Runs every day at 00:00 IST
+// IST midnight = 18:30 UTC (previous day)
+cron.schedule("30 18 * * *", async () => {
   try {
-    const today = getDateOnly(new Date());
+    const { dayIST } = getISTDayBounds(new Date());
 
-    // Fetch 5 random questions
+    // Pick 5 random questions not yet displayed
     const questions = await devquestModel.aggregate([
-      { $sample: { size: 8 } }
+      { $match: { isAlreadyDisplayed: false } },
+      { $sample: { size: 5 } }
     ]);
 
-    // Always create a NEW quiz (don’t overwrite old ones)
-    await dailyQuizModel.create({
-      date: today, // keep today's date so we know when it belongs
+    if (!questions.length) {
+      console.log("⚠️ No more questions available to schedule.");
+      return;
+    }
+
+    // Insert into dailyQuizModel
+    const quiz = await dailyQuizModel.create({
+      date: dayIST,
       questions: questions.map(q => q._id)
     });
 
-    console.log("✅ New daily quiz inserted at", new Date().toLocaleTimeString());
+    // Mark them as displayed
+    await devquestModel.updateMany(
+      { _id: { $in: questions.map(q => q._id) } },
+      { $set: { isAlreadyDisplayed: true } }
+    );
+
+    console.log("✅ New daily quiz created for", dayIST.toDateString());
   } catch (err) {
     console.error("❌ Error creating daily quiz:", err.message);
   }
 });
-// // controllers/dailyQuiz.controller.js
-// export const getDailyQuiz = async (req, res) => {
-//   try {
-//     const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // +05:30 offset
 
-//     // Get current time
-//     const now = new Date();
-
-//     // Shift "now" into IST
-//     const nowIst = new Date(now.getTime() + IST_OFFSET_MS);
-
-//     // Extract IST date parts
-//     const year = nowIst.getUTCFullYear();
-//     const month = nowIst.getUTCMonth();
-//     const day = nowIst.getUTCDate();
-
-//     // Start of IST day → shift back to UTC
-//     const startUtc = new Date(Date.UTC(year, month, day) - IST_OFFSET_MS);
-//     // End of IST day
-//     const endUtc = new Date(startUtc.getTime() + 24 * 60 * 60 * 1000);
-
-//     console.log("IST Day window (UTC):", startUtc.toISOString(), "→", endUtc.toISOString());
-
-//     const dailyQuiz = await dailyQuizModel
-//       .findOne({ date: { $gte: startUtc, $lt: endUtc } })
-//       .populate("questions")
-//       .sort({ createdAt: -1 });
-
-//     if (!dailyQuiz) {
-//       return res.status(404).json({ message: "No quiz set for today yet" });
-//     }
-
-//     res.status(200).json({
-//       message: "Today's latest quiz",
-//       dailyQuiz
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 export const getDailyQuiz = async (req, res) => {
   try {
-    const today = new Date();
+    const { startUTC, endUTC } = getISTDayBounds(new Date());
 
-    // console.log(new Date(Date.now()));
-    const startOfDay = new Date(Date.now());
-    console.log(startOfDay);
-    const endOfDay = new Date(Date.now() + 1);
-    console.log(endOfDay);
-    console.log("------------");
     const dailyQuiz = await dailyQuizModel
       .findOne({
-        date: { $gte: startOfDay, $lt: endOfDay }
+        date: { $gte: startUTC, $lte: endUTC }
       })
       .populate("questions")
       .sort({ createdAt: -1 });
@@ -148,17 +137,26 @@ export const getDailyQuiz = async (req, res) => {
   }
 };
 
+export const sendAllQuizData = async (req, res) => {
+  try {
+    const allQuizzes = await dailyQuizModel.find()
+      .populate("questions")
+      .sort({ createdAt: -1 });
 
-export const sendAllQuizData = async(req , res)=>{
-  try{
-    const quizData = await dailyQuizModel.find().populate("questions");
+    if (!allQuizzes || allQuizzes.length === 0) {
+      return res.status(404).json({ message: "No quizzes found" });
+    }
+    
+    const quizzesExcludingLatest = allQuizzes.slice(1);
+
     res.status(200).json({
-      "message" : "successfully retrieve the quiz data",
-      quizData
-    })
-  }catch(error){
+      message: "Successfully retrieved quiz data (excluding latest)",
+      quizData: quizzesExcludingLatest,
+    });
+  } catch (error) {
+    console.error("Error in sendAllQuizData:", error);
     res.status(500).json({
       message: error.message,
     });
   }
-}
+};
