@@ -54,6 +54,7 @@ export default function HackathonDetails() {
                 } else {
                     setHackathon(res.data);
                 }
+                console.log(res.data)
             } catch (err) {
                 console.error(err);
                 setError("Failed to load hackathon details. Please try again later.");
@@ -90,10 +91,14 @@ export default function HackathonDetails() {
                     isActive={isHackathonActive}
                     startDate={hackathon.startDate}
                     endDate={hackathon.endDate}
-                    participantCount={hackathon.submissions?.length || 0}
-                    prizeMoney={hackathon.prizeMoney}
+                    participantCount={hackathon.numParticipants || 0}
+                    prizeMoney1={hackathon.prizeMoney1}
+                    prizeMoney2={hackathon.prizeMoney2}
+                    prizeMoney3={hackathon.prizeMoney3}
                     imageUrl="/assets/hackathon-banner.png"
                     hackathonId={hackathon._id}
+                    submissionStartDate={hackathon?.submissionStartDate}
+                    submissionEndDate={hackathon?.submissionEndDate}
                 />
                 <div className="flex flex-col lg:flex-row max-w-screen-2xl mx-auto">
                     <SidebarNav
