@@ -302,10 +302,10 @@ export const UserDashboard = () => {
             return res.data;
           })
         );
-        console.log(results)
+        // console.log(results)
         setSubmission(results);
       } catch (err) {
-        console.error("Error fetching submission:", err);
+        
       }
     };
 
@@ -323,7 +323,7 @@ export const UserDashboard = () => {
             return res.data;
           })
         );
-        console.log(submission)
+        // console.log(submission)
         setHackathon(results);
       } catch (err) {
         console.error("Error fetching hackathon:", err);
@@ -897,12 +897,12 @@ export const UserDashboard = () => {
                           >
                             View Submission
                           </a> */}
-                          <button
+                          {/* <button
                             onClick={() => openSubmissionModal(hack._id)}
                             className="mt-2 text-green-400 cursor-pointer"
                           >
                             View Submission
-                          </button>
+                          </button> */}
                         </div>
                       </div>
                     </div>

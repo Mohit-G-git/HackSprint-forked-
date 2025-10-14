@@ -35,6 +35,28 @@ export const ContentSection = ({ activeSection, hackathon }) => {
     </div>
   );
 
+  const SimpleContentSectionRef = ({ title, content }) => (
+    <div>
+      <SectionHeader>{title}</SectionHeader>
+      <SectionCard>
+        <div className="text-gray-300 whitespace-pre-line leading-relaxed prose max-w-none">
+          {content ? (
+            <a
+              href={content}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:underline"
+            >
+              {content}
+            </a>
+          ) : (
+            `No ${title.toLowerCase()} information provided.`
+          )}
+        </div>
+      </SectionCard>
+    </div>
+  );
+
   // NEW: Component specifically for sections with array content to display as a list
   const ListContentSection = ({ title, content }) => {
     const isContentAvailable = Array.isArray(content) && content.length > 0;
@@ -183,6 +205,8 @@ export const ContentSection = ({ activeSection, hackathon }) => {
         return <SimpleContentSection title="Prizes" content={prizeContent} />;
       case "about":
         return <SimpleContentSection title="About" content={hackathon.aboutUs} />;
+      case "refMaterial":
+        return <SimpleContentSectionRef title="Reference Material" content={hackathon.refMaterial} />;
 
       case "faqs":
         const rawFaqs = hackathon.FAQs || [];
@@ -236,7 +260,7 @@ export const ContentSection = ({ activeSection, hackathon }) => {
               <Users className="w-16 h-16 mx-auto mb-4 text-green-400/50" />
               <p className="text-lg text-white font-semibold">Join the conversation!</p>
               <p className="text-gray-400 mt-2 mb-6">Connect with fellow participants on our Discord server.</p>
-              <a href="https://discord.gg/JHSRmuQu" target="_blank">
+              <a href="https://discord.com/channels/789426842410680365/985360797729423400" target="_blank">
                 <Button className="border border-green-500 text-white font-bold hover:bg-green-500/10 cursor-pointer">
                   Join Discord Community
                 </Button>

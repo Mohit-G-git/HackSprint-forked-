@@ -57,13 +57,17 @@ export const HeroSection = ({
   useEffect(() => {
     const fetchTeamData = async (teamId, currentUserId) => {
       try {
+        if (!teamId) return; // <-- safeguard
+
         const res = await fetch(
           `${import.meta.env.VITE_API_BASE_URL}/api/team/${teamId}`
         );
         if (!res.ok) throw new Error("Failed to fetch team");
         const data = await res.json();
         const team = data.team;
-        setTeamData(team);
+
+        console.log(team)
+        setTeamData(team)
 
         if (team?.hackathon?._id && String(team.hackathon._id) === String(hackathonId)) {
           const member = team.members?.some(
@@ -84,6 +88,7 @@ export const HeroSection = ({
       try {
         const res = await getDashboard();
         const fetchedUserData = res.data.userData;
+        // console.log(fetchedUserData)
         setUserData(fetchedUserData);
         setIsVerified(fetchedUserData?.isVerified || false);
 
@@ -100,12 +105,12 @@ export const HeroSection = ({
         setIsLeader(leader || false);
         setLeaderButton(leader || false);
 
-        if (fetchedUserData.team) {
+        // ✅ Always send teamId here
+        if (fetchedUserData?.team) {
           await fetchTeamData(fetchedUserData.team, fetchedUserData._id);
         } else {
           setIsTeamMember(false);
         }
-
       } catch (err) {
         console.error("Dashboard fetch error:", err.message);
         setUserData(null);
@@ -118,11 +123,12 @@ export const HeroSection = ({
       }
     };
 
+    fetchTeamData();
     fetchUserData();
   }, [hackathonId]);
 
   // useEffect(() => {
-  //   console.log("Team Data Updated:", teamData);
+  //   console.log("Team Data Updated:", teamData?.code);
   // }, [teamData]);
 
   useEffect(() => {
@@ -273,7 +279,7 @@ export const HeroSection = ({
           <img
             src={imageError ? fallbackImage : imageUrl}
             alt="Hackathon Banner"
-            className="w-full h-full object-cover"
+            className="w-full h-100 object-cover"
             onError={() => setImageError(true)}
           />
         </div>
