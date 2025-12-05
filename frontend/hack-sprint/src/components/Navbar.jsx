@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { getDashboard } from '../backendApis/api';
-import { Menu, X, User, Trophy, Terminal, LogOut, Coins, LogIn } from 'lucide-react'
+import { Menu, X, User, Trophy, Terminal, LogOut, Coins, LogIn, Crown } from 'lucide-react'
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -41,7 +41,7 @@ const Navbar = () => {
   const navItems = [
     { name: 'Hackathons', pageLink: '/hackathons', icon: Trophy },
     { name: 'Practice', pageLink: '/quest', icon: Terminal },
-    { name: 'Leaderboard', pageLink: '/leaderboard', icon: Terminal }
+    { name: 'Leaderboard', pageLink: '/leaderboard', icon: Crown }
   ]
 
   const handleNavigate = (link) => {
@@ -260,7 +260,7 @@ const Navbar = () => {
                     </div>
                     <div className="flex items-center space-x-1 text-yellow-400">
                       <Coins size={16} />
-                      <span className="text-sm font-semibold">{userInfo?.coins || 10}</span>
+                      <span className="text-sm font-semibold">{coins || 10}</span>
                     </div>
                   </div>
 
